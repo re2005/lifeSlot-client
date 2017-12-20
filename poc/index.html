@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>BlockByte</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=0"/>
+    <link rel="stylesheet" href="style.css" media="screen"/>
+</head>
+<body>
+
+<section class="options">
+    <h1>ETHBlockByte</h1>
+    <p>
+        <input id="result" type="number" max="3" value="123">
+        <button id="spin">Spin</button>
+        <button id="reset">Reset</button>
+        <button id="standby">Standby</button>
+        <button id="standby-play">Standby Play</button>
+    </p>
+</section>
+
+<div class="spinners spinning">
+    <section class="container">
+        <div class="carousel-item spinning">
+            <figure>-</figure>
+            <figure>0</figure>
+            <figure>1</figure>
+            <figure>2</figure>
+            <figure>3</figure>
+            <figure>4</figure>
+            <figure>5</figure>
+            <figure>6</figure>
+            <figure>7</figure>
+            <figure>8</figure>
+            <figure>9</figure>
+        </div>
+    </section>
+
+    <section class="container">
+        <div class="carousel-item spinning">
+            <figure>-</figure>
+            <figure>0</figure>
+            <figure>1</figure>
+            <figure>2</figure>
+            <figure>3</figure>
+            <figure>4</figure>
+            <figure>5</figure>
+            <figure>6</figure>
+            <figure>7</figure>
+            <figure>8</figure>
+            <figure>9</figure>
+        </div>
+    </section>
+
+    <section class="container">
+        <div class="carousel-item">
+            <figure>-</figure>
+            <figure>0</figure>
+            <figure>1</figure>
+            <figure>2</figure>
+            <figure>3</figure>
+            <figure>4</figure>
+            <figure>5</figure>
+            <figure>6</figure>
+            <figure>7</figure>
+            <figure>8</figure>
+            <figure>9</figure>
+        </div>
+    </section>
+</div>
+<script src="utils.js"></script>
+<script>
+    var transformProp = Modernizr.prefixed('transform');
+    var spinnerList = document.getElementsByClassName('carousel-item');
+
+    function Spinner3D(el) {
+        this.element = el;
+        this.rotation = 0;
+        this.panelCount = 0;
+        this.totalPanelCount = this.element.children.length;
+        this.theta = 0;
+        this.isHorizontal = false;
+    }
+
+    Spinner3D.prototype.modify = function () {
+
+        var panel, angle, i;
+        this.panelSize = this.element[this.isHorizontal ? 'offsetWidth' : 'offsetHeight'];
+        this.rotateFn = this.isHorizontal ? 'rotateY' : 'rotateX';
+        this.theta = 360 / this.panelCount;
+        this.radius = Math.round(( this.panelSize / 2) / Math.tan(Math.PI / this.panelCount));
+
+        for (i = 0; i < this.panelCount; i++) {
+            panel = this.element.children[i];
+            angle = this.theta * i;
+            panel.style.opacity = 1;
+           panel.style.backgroundColor = 'hsla(' + angle + ', 100%, 100%, .85)';
+            // panel.style.backgroundColor = 'rgba(255,255,255,.95)';
+            panel.style[transformProp] = this.rotateFn + '(' + angle + 'deg) translateZ(' + this.radius + 'px)';
+        }
+
+        for (; i < this.totalPanelCount; i++) {
+            panel = this.element.children[i];
+            panel.style.opacity = 0;
+            panel.style[transformProp] = 'none';
+        }
+        this.rotation = Math.round(this.rotation / this.theta) * this.theta;
+        this.transform();
+    };
+
+    Spinner3D.prototype.transform = function () {
+        this.element.style[transformProp] = 'translateZ(-' + this.radius + 'px) ' + this.rotateFn + '(' + this.rotation + 'deg)';
+    };
+
+    var buildSpinners = function () {
+
+        for (let spinner in spinnerList) {
+            if (spinner === 'length') {
+                return;
+            }
+            spinnerList[spinner].carousel = new Spinner3D(spinnerList[spinner]),
+                onNavButtonClick = function (event) {
+                    var increment = parseInt(event.target.getAttribute('data-increment'));
+                    spinnerList[spinner].carousel.rotation += spinnerList[spinner].carousel.theta * increment * -1;
+                    spinnerList[spinner].carousel.transform();
+                };
+
+            spinnerList[spinner].carousel.panelCount = 11;
+            spinnerList[spinner].carousel.modify();
+        }
+    };
+
+    var parseResult = function (result) {
+        let resultArray = ('' + result).split('');
+        if (resultArray.length === 3) {
+            return resultArray;
+        }
+        if (resultArray.length === 2) {
+            resultArray.unshift(0);
+            return resultArray;
+        }
+        if (resultArray.length === 1) {
+            resultArray.unshift(0);
+            resultArray.unshift(0);
+            return resultArray;
+        }
+    };
+
+    var resetSpinner = function () {
+        setStandByOff();
+        for (let spinner in spinnerList) {
+            if (spinner === 'length') {
+                return;
+            }
+            spinnerList[spinner].carousel.rotation = 0;
+            spinnerList[spinner].carousel.transform();
+        }
+    };
+
+    var getRandomArbitrary = function (min, max) {
+        return Math.random() * (max - min) + min;
+    };
+
+    var spin = function (key, spinner) {
+        setStandByOff();
+        spinnerList[key].carousel.rotation = 0;
+        spinnerList[key].carousel.transform();
+        if (spinner === 0) return;
+        let spin = parseInt(spinner) + 12;
+        let time = getRandomArbitrary(100, 800);
+
+        setTimeout(function () {
+            spinnerList[key].carousel.rotation += spinnerList[key].carousel.theta * spin * -1;
+            spinnerList[key].carousel.transform();
+        }, time);
+
+        setTimeout(function () {
+            var spinners = document.getElementsByClassName('spinners');
+            spinners[0].removeClassName('spinning-play');
+        }, 2000);
+
+    };
+
+    var setStandByPlayOn = function () {
+        var spinners = document.getElementsByClassName('spinners');
+        spinners[0].addClassName('spinning-play');
+        spinners[0].removeClassName('spinning');
+    };
+
+
+    var setStandByOn = function () {
+        var spinners = document.getElementsByClassName('spinners');
+        spinners[0].addClassName('spinning');
+    };
+
+    var setStandByOff = function () {
+        var spinners = document.getElementsByClassName('spinners');
+        spinners[0].removeClassName('spinning');
+    };
+
+    var init = function () {
+
+        buildSpinners();
+
+        document.getElementById('standby').addEventListener('click', function () {
+            setStandByOn();
+        });
+
+
+
+        document.getElementById('standby-play').addEventListener('click', function () {
+            setStandByPlayOn();
+        });
+
+        document.getElementById('reset').addEventListener('click', function () {
+            resetSpinner();
+        });
+
+        document.getElementById('spin').addEventListener('click', function () {
+            debugger;
+            let result = document.getElementById('result');
+            let parsedResult = parseResult(result.value);
+
+            for (let spinner in spinnerList) {
+                if (spinner === 'length') {
+                    return;
+                }
+                debugger
+                spin(spinner, parsedResult[spinner]);
+
+            }
+        }, false);
+
+
+        setTimeout(function () {
+            document.body.addClassName('ready');
+        }, 0);
+
+    };
+
+    window.addEventListener('DOMContentLoaded', init, false);
+</script>
+
+
+</body>
+</html>
