@@ -1,3 +1,5 @@
+@import "./nouislider.min.css";
+
 body {
     font-family: 'Helvetica Neue', Arial, sans-serif;
     -webkit-text-size-adjust: none;
@@ -75,7 +77,6 @@ button {
     animation-delay: 2s;
 }
 
-
 .carousel-item figure {
     display: block;
     /*backface-visibility: hidden;*/
@@ -101,4 +102,117 @@ button {
     100% {
         transform: translateZ(-153px) rotateX(-19999deg);
     }
+}
+
+body, input, button {
+    font-family: monospace;
+    font-size: 1.2rem;
+    background-color: #eee;
+    width: 640px;
+    margin: 0 auto;
+}
+
+article {
+    border: 3px dashed #ddd;
+    margin-bottom: 20px;
+}
+
+#max_fee {
+    color: #a00;
+}
+
+#balance {
+    color: #0a0;
+}
+
+#last_result {
+    color: #008;
+}
+
+.winner {
+    color: #0a0;
+}
+
+a {
+    color: #555;
+}
+
+.line {
+    padding: 0 20px;
+    font-weight: bold;
+    margin: 10px 0;
+    border-bottom: 1px dotted #ccc;
+}
+
+.line span {
+    font-weight: normal;
+    float: right;
+}
+
+#submit {
+    margin: 0 100px 60px 100px;
+    padding: 20px 0;
+    width: 400px;
+}
+
+h3, h5 {
+    text-align: center;
+}
+
+#account {
+    float: right;
+    color: #080;
+}
+
+#error {
+    color: #f00;
+}
+
+time {
+    display: inline-block;
+    width: 200px;
+    text-align: center;
+}
+
+#guess-slider, #fee-slider {
+    width: 400px;
+    margin: 60px 100px;
+}
+
+#play {
+    color: #aaa;
+}
+
+.red {
+    background-color: #a00;
+}
+
+.green {
+    background-color: #0a0;
+}
+
+@keyframes pending {
+    0% {
+        background-color: darkred;
+    }
+    25% {
+        background-color: orange;
+    }
+    50% {
+        background-color: darkblue;
+    }
+    75% {
+        background-color: darkgreen;
+    }
+    100% {
+        background-color: darkred;
+    }
+}
+
+.pending {
+    padding: 10px 0;
+    background-color: red;
+    animation-name: pending;
+    animation-duration: 4s;
+    animation-iteration-count: infinite;
 }
