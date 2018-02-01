@@ -2,184 +2,161 @@ require('./utils');
 const noUiSlider = require('./nouislider.min');
 const BigNumber = require('./bignumber.min');
 const abi = require('./conf.js');
-const transformProp = 'transform';
+import Spinner from './spinner';
+import '../css/style.scss';
+import '../css/nouislider.min.css';
 
-function Spinner3D(el) {
-    this.element = el;
-    this.rotation = 0;
-    this.panelCount = 0;
-    this.totalPanelCount = this.element.children.length;
-    this.theta = 0;
-    this.isHorizontal = false;
-}
+class App {
 
-Spinner3D.prototype.modify = function () {
+    constructor() {
+        this.spinnerList = undefined;
+        this.address = '0x995f617066a6968749eb980c2613314f4d45d4ab';
+        this.contract = window.web3.eth.contract(abi);
+        this.ETHBlockByte = this.contract.at(this.address);
+        this.step = 1000000000000000; // 0.001 ETH
 
-    let panel, angle, i;
-    this.panelSize = this.element[this.isHorizontal ? 'offsetWidth' : 'offsetHeight'];
-    this.rotateFn = this.isHorizontal ? 'rotateY' : 'rotateX';
-    this.theta = 360 / this.panelCount;
-    this.radius = Math.round((this.panelSize / 2) / Math.tan(Math.PI / this.panelCount));
-
-    for (i = 0; i < this.panelCount; i++) {
-        panel = this.element.children[i];
-        angle = this.theta * i;
-        panel.style.opacity = 1;
-        panel.style.backgroundColor = 'hsla(' + angle + ', 100%, 100%, .85)';
-        panel.style[transformProp] = this.rotateFn + '(' + angle + 'deg) translateZ(' + this.radius + 'px)';
+        this.checkMetaMask();
+        this.init(this.address, this.ETHBlockByte);
+        this.initSpinner();
     }
 
-    for (; i < this.totalPanelCount; i++) {
-        panel = this.element.children[i];
-        panel.style.opacity = 0;
-        panel.style[transformProp] = 'none';
-    }
-    this.rotation = Math.round(this.rotation / this.theta) * this.theta;
-    this.transform();
-};
-
-Spinner3D.prototype.transform = function () {
-    this.element.style[transformProp] = 'translateZ(-' + this.radius + 'px) ' + this.rotateFn + '(' + this.rotation + 'deg)';
-};
-
-var buildSpinners = function () {
-
-    var spinnerList = document.getElementsByClassName('carousel-item');
-
-    for (let spinner = 0; spinner < spinnerList.length; spinner++) {
-        spinnerList[spinner].carousel = new Spinner3D(spinnerList[spinner]),
-            onNavButtonClick = function (event) {
-                var increment = parseInt(event.target.getAttribute('data-increment'));
-                spinnerList[spinner].carousel.rotation += spinnerList[spinner].carousel.theta * increment * -1;
-                spinnerList[spinner].carousel.transform();
-            };
-
-        spinnerList[spinner].carousel.panelCount = 11;
-        spinnerList[spinner].carousel.modify();
-    }
-};
-
-var parseResult = function (result) {
-    let resultArray = ('' + result).split('');
-    if (resultArray.length === 3) {
-        return resultArray;
-    }
-    if (resultArray.length === 2) {
-        resultArray.unshift(0);
-        return resultArray;
-    }
-    if (resultArray.length === 1) {
-        resultArray.unshift(0);
-        resultArray.unshift(0);
-        return resultArray;
-    }
-};
-
-var resetSpinner = function () {
-    setStandByOff();
-    for (let spinner in spinnerList) {
-        if (spinner === 'length') {
-            return;
+    checkMetaMask() {
+        if (typeof window.web3 !== 'undefined') {
+            window.web3 = new Web3(window.web3.currentProvider);
+        } else {
+            window.web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:8545"));
         }
-        spinnerList[spinner].carousel.rotation = 0;
-        spinnerList[spinner].carousel.transform();
+
+        if (!window.web3.eth.accounts[0]) {
+            const interval = setInterval(function () {
+                if (web3.eth.accounts[0]) {
+                    clearInterval(interval);
+                    document.getElementById('error').innerText = '';
+                    let interval = setInterval(() => {
+                        this.updateBalance();
+                    }, 2000);
+                }
+                else {
+                    document.getElementById('error').innerText = 'Unlock metamask account';
+                }
+            }, 5000);
+        } else {
+            this.updateBalance();
+        }
     }
-};
 
-var getRandomArbitrary = function (min, max) {
-    return Math.random() * (max - min) + min;
-};
+    buildSpinners() {
+        this.spinnerList = document.getElementsByClassName('carousel-item');
 
-var spin = function (key, spinner) {
-    setStandByOff();
-    spinnerList[key].carousel.rotation = 0;
-    spinnerList[key].carousel.transform();
-    if (spinner === 0) return;
-    let spin = parseInt(spinner) + 12;
-    let time = getRandomArbitrary(100, 800);
+        for (let spinner = 0; spinner < this.spinnerList.length; spinner++) {
+            this.spinnerList[spinner].carousel = new Spinner(this.spinnerList[spinner]);
 
-    setTimeout(function () {
-        spinnerList[key].carousel.rotation += spinnerList[key].carousel.theta * spin * -1;
-        spinnerList[key].carousel.transform();
-    }, time);
+            this.spinnerList[spinner].carousel.panelCount = 11;
+            this.spinnerList[spinner].carousel.modify();
+        }
+    };
 
-    setTimeout(function () {
+    parseResult(result) {
+        let resultArray = ('' + result).split('');
+        if (resultArray.length === 3) {
+            return resultArray;
+        }
+        if (resultArray.length === 2) {
+            resultArray.unshift(0);
+            return resultArray;
+        }
+        if (resultArray.length === 1) {
+            resultArray.unshift(0);
+            resultArray.unshift(0);
+            return resultArray;
+        }
+    };
+
+    resetSpinner() {
+        this.setStandByOff();
+        for (let spinner in this.spinnerList) {
+            if (spinner === 'length') {
+                return;
+            }
+            this.spinnerList[spinner].carousel.rotation = 0;
+            this.spinnerList[spinner].carousel.transform();
+        }
+    };
+
+    getRandomArbitrary(min, max) {
+        return Math.random() * (max - min) + min;
+    };
+
+    spin(key, spinner) {
+        this.setStandByOff();
+        this.spinnerList[key].carousel.rotation = 0;
+        this.spinnerList[key].carousel.transform();
+        if (spinner === 0) return;
+        let spin = parseInt(spinner) + 12;
+        let time = this.getRandomArbitrary(100, 800);
+
+        setTimeout(() => {
+            this.spinnerList[key].carousel.rotation += this.spinnerList[key].carousel.theta * spin * -1;
+            this.spinnerList[key].carousel.transform();
+        }, time);
+
+        setTimeout(() => {
+            const spinners = document.getElementsByClassName('spinners');
+            spinners[0].removeClassName('spinning-play');
+        }, 2000);
+
+    };
+
+    setStandByPlayOn() {
         var spinners = document.getElementsByClassName('spinners');
-        spinners[0].removeClassName('spinning-play');
-    }, 2000);
-
-};
-
-var setStandByPlayOn = function () {
-    var spinners = document.getElementsByClassName('spinners');
-    spinners[0].addClassName('spinning-play');
-    spinners[0].removeClassName('spinning');
-};
+        spinners[0].addClassName('spinning-play');
+        spinners[0].removeClassName('spinning');
+    };
 
 
-var setStandByOn = function () {
-    var spinners = document.getElementsByClassName('spinners');
-    spinners[0].addClassName('spinning');
-};
+    setStandByOn() {
+        let spinners = document.getElementsByClassName('spinners');
+        spinners[0].addClassName('spinning');
+    };
 
-var setStandByOff = function () {
-    var spinners = document.getElementsByClassName('spinners');
-    spinners[0].removeClassName('spinning');
-};
+    setStandByOff() {
+        var spinners = document.getElementsByClassName('spinners');
+        spinners[0].removeClassName('spinning');
+    };
 
-var spinFromPlay = function (result) {
-    let parsedResult = parseResult(result);
+    spinFromPlay(result) {
+        let parsedResult = this.parseResult(result);
 
-    for (let spinner in spinnerList) {
-        if (spinner === 'length') {
-            return;
+        for (let spinner in this.spinnerList) {
+            if (spinner === 'length') {
+                return;
+            }
+            this.spin(spinner, parsedResult[spinner]);
         }
-        spin(spinner, parsedResult[spinner]);
+    };
 
-    }
-};
+    initSpinner() {
 
-const initSpinner = function () {
+        this.buildSpinners();
 
-    buildSpinners();
+        setTimeout(() => {
+            this.setStandByOn();
+        }, 1600);
 
-    setTimeout(function () {
-        setStandByOn();
-    }, 1600);
+        setTimeout(() => {
+            document.body.addClassName('ready');
+        }, 0);
 
-    setTimeout(function () {
-        document.body.addClassName('ready');
-    }, 0);
+    };
 
-};
+    updateBalance() {
+        web3.eth.getBalance(web3.eth.accounts[0], function (e, r) {
+            document.getElementById('account').innerText = parseFloat(web3.fromWei(r, 'ether')).toFixed(5) + ' ETH';
+        });
+    };
 
-const bootstrap = function () {
 
-    if (typeof window.web3 !== 'undefined') {
-        var web3 = new Web3(window.web3.currentProvider);
-    } else {
-        // set the provider you want from Web3.providers, for local dev
-        var web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:8545"));
-    }
-
-    if (!web3.eth.accounts[0]) {
-        var interval = setInterval(function () {
-            if (web3.eth.accounts[0]) {
-                clearInterval(interval);
-                document.getElementById('error').innerText = '';
-                var interval = setInterval(function () {
-                    web3.eth.getBalance(web3.eth.accounts[0], function (e, r) {
-                        document.getElementById('account').innerText = parseFloat(web3.fromWei(r, 'ether')).toFixed(5) + ' ETH';
-                    });
-                }, 2000);
-            }
-            else {
-                document.getElementById('error').innerText = 'Unlock metamask account';
-            }
-        }, 5000);
-    }
-
-    var data = function (address, contract) {
+    data(address, contract) {
         return {
             contract: contract,
             address: address,
@@ -191,8 +168,8 @@ const bootstrap = function () {
         };
     };
 
-    var init = function (address, contract) {
-        var proxy = new Proxy(data(address, contract), {
+    init(address, contract) {
+        const proxy = new Proxy(this.data(address, contract), {
             set: function (obj, prop, value) {
                 obj[prop] = value;
                 switch (prop) {
@@ -219,27 +196,29 @@ const bootstrap = function () {
                 return true;
             }
         });
-        var all_events = proxy.contract.allEvents({fromBlock: 'latest'}, function (e, r) {
+
+        let all_events = proxy.contract.allEvents({fromBlock: 'latest'}, (e, r) => {
 
             switch (r.event) {
                 case 'Play':
-                    render_play(r);
+                    this.render_play(r);
                     proxy.last_result = parseInt(r.args._result);
 
                     if (r.args._sender == web3.eth.accounts[0]) {
-                        spinFromPlay(proxy.last_result);
+                        this.spinFromPlay(proxy.last_result);
                     }
 
                     break;
 
                 case 'Balance':
                     proxy.balance = r.args._balance;
-                    proxy.contract.max_fee(function (e, r) {
+                    proxy.contract.max_fee((e, r) => {
                         proxy.max_fee = r;
-                        max_fee = parseInt(parseInt(r / step) * step);
+
+                        let max_fee = parseInt(parseInt(r / this.step) * this.step);
                         document.getElementById('fee-slider').noUiSlider.updateOptions({
                             range: {
-                                min: step,
+                                min: this.step,
                                 max: max_fee
                             }
                         });
@@ -251,27 +230,27 @@ const bootstrap = function () {
                     break;
             }
         });
-        render(proxy);
-        collect_data(proxy);
+        this.render(proxy);
+        this.collect_data(proxy);
     };
 
-    var collect_old_events = function (data) {
-        web3.eth.getBlockNumber(function (e, r) {
-            var to_block = r;
+    collect_old_events(data) {
+        web3.eth.getBlockNumber((e, r) => {
+            let to_block = r;
             data.contract.Play({_sender: [web3.eth.accounts[0]]}, {
                 fromBlock: data.create_block,
                 toBlock: to_block
-            }, function (e, r) {
+            }, (e, r) => {
                 if (e) {
                     console.log(e);
                     return;
                 }
-                render_play(r);
+                this.render_play(r);
             });
         });
     };
 
-    var collect_data = function (data) {
+    collect_data(data) {
         var contract = data.contract;
         web3.eth.getBalance(data.address, function (e, r) {
             data.balance = r;
@@ -279,14 +258,14 @@ const bootstrap = function () {
         contract.owner(function (e, r) {
             data.owner = r;
         });
-        contract.max_fee(function (e, r) {
+        contract.max_fee((e, r) => {
             data.max_fee = r;
-            create_sliders(r);
+            this.create_sliders(r);
         });
-        contract.create_block(function (e, r) {
+        contract.create_block((e, r) => {
             data.create_block = r;
-            setTimeout(function () {
-                collect_old_events(data);
+            setTimeout(() => {
+                this.collect_old_events(data);
             }, 2000);
         });
         contract.last_result(function (e, r) {
@@ -295,14 +274,14 @@ const bootstrap = function () {
         data.address = data.address;
     };
 
-    var time_now = function () {
+    time_now() {
         var d = new Date();
         var now = Math.floor(d.getTime() / 1000);
         return now;
     };
 
-    var time_ago = function (timestamp) {
-        var seconds = time_now() - timestamp;
+    time_ago(timestamp) {
+        var seconds = this.time_now() - timestamp;
         if (seconds > 2 * 86400) {
             return Math.floor(seconds / 86400) + ' days ago';
         }
@@ -318,16 +297,16 @@ const bootstrap = function () {
         return 'a few sec ago';
     }
 
-    var update_time_ago = function () {
+    update_time_ago() {
         var times = document.getElementsByTagName('time');
         for (var i = 0; i < times.length; i++) {
-            times[i].innerText = time_ago(times[i].dataset.timestamp);
+            times[i].innerText = this.time_ago(times[i].dataset.timestamp);
         }
     };
 
-    var wait_play = function (tx) {
-        id = tx;
-        var el = document.getElementById(id);
+    wait_play(tx) {
+        let id = tx;
+        const el = document.getElementById(id);
         if (!el) {
             var article = document.getElementById('play');
             var div = document.createElement('div');
@@ -335,7 +314,7 @@ const bootstrap = function () {
             div.className = 'line pending';
 
             var time = document.createElement('time');
-            time.dataset.timestamp = time_now();
+            time.dataset.timestamp = this.time_now();
             var text = document.createTextNode('NOW');
             time.appendChild(text);
             div.appendChild(time);
@@ -346,8 +325,8 @@ const bootstrap = function () {
         }
     };
 
-    var render_play = function (play_event) {
-        id = play_event.transactionHash;
+    render_play(play_event) {
+        let id = play_event.transactionHash;
         var el = document.getElementById(id);
         if (el) {
             el.parentNode.removeChild(el);
@@ -359,7 +338,7 @@ const bootstrap = function () {
 
         var time = document.createElement('time');
         time.dataset.timestamp = play_event.args._time;
-        var text = document.createTextNode(time_ago(play_event.args._time));
+        var text = document.createTextNode(this.time_ago(play_event.args._time));
         time.appendChild(text);
         div.appendChild(time);
 
@@ -371,9 +350,10 @@ const bootstrap = function () {
         article.prepend(div);
     };
 
-    var render = function (data) {
-        var section = document.getElementById('section');
-        var article = document.createElement('article');
+    render(data) {
+
+        let section = document.getElementById('section');
+        let article = document.createElement('article');
         article.id = data.address;
         for (var key in data) {
             if (['contract', 'create_block'].indexOf(key) != -1) {
@@ -423,8 +403,8 @@ const bootstrap = function () {
         input.id = 'submit';
         input.type = 'button';
         input.value = 'PLAY'
-        input.addEventListener('click', function () {
-            play(data);
+        input.addEventListener('click', () => {
+            this.play(data);
         });
         div.appendChild(input);
 
@@ -439,16 +419,15 @@ const bootstrap = function () {
         div.className = 'line';
         div.id = 'play';
         article.appendChild(div);
-
         section.appendChild(article);
 
-        setInterval(function () {
-            update_time_ago();
+        setInterval(() => {
+            this.update_time_ago();
         }, 60000);
     };
 
-    var create_sliders = function (max_fee) {
-        var guess_slider = document.getElementById('guess-slider');
+    create_sliders(max_fee) {
+        let guess_slider = document.getElementById('guess-slider');
         noUiSlider.create(guess_slider, {
             start: [30, 225],
             step: 1,
@@ -473,24 +452,24 @@ const bootstrap = function () {
                 }
             }
         });
-        var connect = guess_slider.querySelectorAll('.noUi-connect');
+
+        let connect = guess_slider.querySelectorAll('.noUi-connect');
         connect[0].classList.add('red');
         connect[1].classList.add('blue');
         connect[2].classList.add('red');
-        guess_slider.noUiSlider.on('set', function () {
-            calculate_prize();
+        guess_slider.noUiSlider.on('set', () => {
+            this.calculate_prize();
         });
 
-
-        max_fee = parseInt(parseInt(max_fee / step) * step);
-        var fee_slider = document.getElementById('fee-slider');
+        max_fee = parseInt(parseInt(max_fee / this.step) * this.step);
+        let fee_slider = document.getElementById('fee-slider');
         noUiSlider.create(fee_slider, {
             start: 0.1,
-            step: step,
+            step: this.step,
             connect: [true, false],
             tooltips: true,
             range: {
-                'min': step,
+                'min': this.step,
                 'max': max_fee
             },
             format: {
@@ -502,26 +481,27 @@ const bootstrap = function () {
                 }
             }
         });
-        var connect = fee_slider.querySelectorAll('.noUi-connect');
+
+        connect = fee_slider.querySelectorAll('.noUi-connect');
         connect[0].classList.add('green');
-        fee_slider.noUiSlider.on('set', function () {
-            calculate_prize();
+        fee_slider.noUiSlider.on('set', () => {
+            this.calculate_prize();
         });
-        calculate_prize();
+        this.calculate_prize();
     };
 
-    var calculate_prize = function () {
-        var guess_slider = document.getElementById('guess-slider').noUiSlider.get()
-        var start = guess_slider[0];
-        var end = guess_slider[1];
-        var fee = web3.toWei(document.getElementById('fee-slider').noUiSlider.get().replace(' ETH', ''), 'ether');
+
+    calculate_prize() {
+        let guess_slider = document.getElementById('guess-slider').noUiSlider.get();
+        let start = guess_slider[0];
+        let end = guess_slider[1];
+        let fee = web3.toWei(document.getElementById('fee-slider').noUiSlider.get().replace(' ETH', ''), 'ether');
         fee = new BigNumber(fee);
 
-        // from .sol
-        var range = end - start + 1;
-        var percentage = 100 - parseInt(range * 100 / 255);
-        var prize = fee.times(percentage).div(100);
-        var credit = fee.plus(prize);
+        let range = end - start + 1;
+        let percentage = 100 - parseInt(range * 100 / 255);
+        let prize = fee.times(percentage).div(100);
+        let credit = fee.plus(prize);
 
         fee = parseFloat(web3.fromWei(fee, 'ether')).toFixed(3) + ' ETH';
         credit = parseFloat(web3.fromWei(credit, 'ether')).toFixed(3) + ' ETH';
@@ -529,7 +509,7 @@ const bootstrap = function () {
         document.getElementById('submit').value = 'PLAY ' + fee + ' and WIN ' + credit;
     };
 
-    var play = function (data) {
+    play(data) {
         if (!web3.eth.accounts[0]) {
             document.getElementById('play-error').innerText = 'Unlock metamask account';
             return;
@@ -545,15 +525,15 @@ const bootstrap = function () {
             start = "0x" + start;
             end = "0x" + end;
             fee = new BigNumber(fee);
-            data.contract.play(start, end, {from: web3.eth.accounts[0], value: fee}, function (e, r) {
+            data.contract.play(start, end, {from: web3.eth.accounts[0], value: fee}, (e, r) => {
                 if (e) {
                     document.getElementById('play-error').innerText = 'Transaction was NOT completed, try again.';
                     console.log(e.message);
                 }
                 if (r) {
-                    wait_play(r);
+                    this.wait_play(r);
                     console.log('play tx ' + r);
-                    setStandByPlayOn();
+                    this.setStandByPlayOn();
 
                 }
             });
@@ -562,18 +542,9 @@ const bootstrap = function () {
             document.getElementById('play-error').innerText = 'enter start and end bytes';
         }
     };
+}
 
-    var address = '0x995f617066a6968749eb980c2613314f4d45d4ab';
-    var contract = web3.eth.contract(abi);
-    var ETHBlockByte = contract.at(address);
-    var step = 1000000000000000; // 0.001 ETH
-
-    init(address, ETHBlockByte);
-
-    return {play: play};
-};
 
 window.addEventListener('DOMContentLoaded', function () {
-    bootstrap();
-    initSpinner();
+    const app = new App();
 }, false);

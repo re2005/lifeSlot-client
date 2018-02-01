@@ -162,12 +162,13 @@
     };
 
     var spin = function (key, spinner) {
+        debugger
         setStandByOff();
         spinnerList[key].carousel.rotation = 0;
         spinnerList[key].carousel.transform();
         if (spinner === 0) return;
         let spin = parseInt(spinner) + 12;
-        let time = getRandomArbitrary(100, 800);
+        let time = this.getRandomArbitrary(100, 800);
 
         setTimeout(function () {
             spinnerList[key].carousel.rotation += spinnerList[key].carousel.theta * spin * -1;
@@ -217,7 +218,6 @@
         });
 
         document.getElementById('spin').addEventListener('click', function () {
-            debugger;
             let result = document.getElementById('result');
             let parsedResult = parseResult(result.value);
 
@@ -225,7 +225,6 @@
                 if (spinner === 'length') {
                     return;
                 }
-                debugger
                 spin(spinner, parsedResult[spinner]);
 
             }
