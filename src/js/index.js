@@ -357,6 +357,10 @@ class App {
         div.appendChild(lucky);
 
         article.prepend(div);
+
+        let section = document.getElementById('section');
+        section.classList.remove("loading");
+
     };
 
     render(data) {

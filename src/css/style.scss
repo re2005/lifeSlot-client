@@ -211,6 +211,21 @@ header {
         overflow: scroll;
         margin-top: 40px;
 
+        .icon-loading {
+            display: none;
+        }
+
+        .loading {
+            .icon-loading {
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                font-size: 30px;
+                display: inline-block;
+                @extend .icon-spin5
+            }
+        }
+
         &:after {
             content: '';
             position: absolute;
