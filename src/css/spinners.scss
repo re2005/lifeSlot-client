@@ -27,12 +27,12 @@
     animation: spinning 700s infinite;
 }
 
-.spinners.spinning .container:nth-child(2) .carousel-item {
+.spinners.spinning .carousel-container:nth-child(2) .carousel-item {
     animation: spinning 800s infinite;
     animation-delay: 2s;
 }
 
-.spinners.spinning .container:nth-child(3) .carousel-item {
+.spinners.spinning .carousel-container:nth-child(3) .carousel-item {
     animation: spinning 900s infinite;
     animation-delay: 4s;
 }
@@ -41,12 +41,12 @@
     animation: spinning 100s infinite;
 }
 
-.spinners.spinning-play .container:nth-child(2) .carousel-item {
+.spinners.spinning-play .carousel-container:nth-child(2) .carousel-item {
     animation: spinning 110s infinite;
     animation-delay: 1s;
 }
 
-.spinners.spinning-play .container:nth-child(3) .carousel-item {
+.spinners.spinning-play .carousel-container:nth-child(3) .carousel-item {
     animation: spinning 40s infinite;
     animation-delay: 2s;
 }
