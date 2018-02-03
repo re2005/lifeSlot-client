@@ -3,36 +3,40 @@ const noUiSlider = require('./nouislider.min');
 const BigNumber = require('./bignumber.min');
 const abi = require('./conf.js');
 import Spinner from './spinner';
+import '../css/reset.scss';
 import '../css/style.scss';
 import '../css/nouislider.min.css';
 
 class App {
 
     constructor() {
-        this.spinnerList = undefined;
-        this.address = '0x995f617066a6968749eb980c2613314f4d45d4ab';
-        this.contract = window.web3.eth.contract(abi);
-        this.ETHBlockByte = this.contract.at(this.address);
-        this.step = 1000000000000000; // 0.001 ETH
 
-        this.checkMetaMask();
-        this.init(this.address, this.ETHBlockByte);
+        if (typeof web3 !== 'undefined') {
+            web3 = new Web3(web3.currentProvider);
+
+            this.spinnerList = undefined;
+            this.address = '0x995f617066a6968749eb980c2613314f4d45d4ab';
+            this.contract = web3.eth.contract(abi);
+            this.ETHBlockByte = this.contract.at(this.address);
+            this.step = 1000000000000000; // 0.001 ETH
+
+            this.getAccountInfo();
+            this.init(this.address, this.ETHBlockByte);
+
+        } else {
+            alert('you need metamask');
+        }
+
         this.initSpinner();
     }
 
-    checkMetaMask() {
-        if (typeof window.web3 !== 'undefined') {
-            window.web3 = new Web3(window.web3.currentProvider);
-        } else {
-            window.web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:8545"));
-        }
-
-        if (!window.web3.eth.accounts[0]) {
-            const interval = setInterval(function () {
+    getAccountInfo() {
+        if (!web3.eth.accounts[0]) {
+            const interval = setInterval(() => {
                 if (web3.eth.accounts[0]) {
                     clearInterval(interval);
                     document.getElementById('error').innerText = '';
-                    let interval = setInterval(() => {
+                    setInterval(() => {
                         this.updateBalance();
                     }, 2000);
                 }
@@ -133,6 +137,7 @@ class App {
             }
             this.spin(spinner, parsedResult[spinner]);
         }
+        this.updateBalance();
     };
 
     initSpinner() {
@@ -146,7 +151,6 @@ class App {
         setTimeout(() => {
             document.body.addClassName('ready');
         }, 0);
-
     };
 
     updateBalance() {
@@ -179,13 +183,13 @@ class App {
                         break;
 
                     case 'last_result':
-                        var _value = parseInt(value);
+                        let _value = parseInt(value);
                         document.getElementById(prop).innerText = _value;
                         break;
 
                     case 'address':
                     case 'owner':
-                        var a = document.createElement('a');
+                        let a = document.createElement('a');
                         a.setAttribute('href', 'https://ropsten.etherscan.io/address/' + value);
                         a.setAttribute('target', '_blank');
                         a.innerText = value;
@@ -251,7 +255,7 @@ class App {
     };
 
     collect_data(data) {
-        var contract = data.contract;
+        let contract = data.contract;
         web3.eth.getBalance(data.address, function (e, r) {
             data.balance = r;
         });
@@ -275,13 +279,13 @@ class App {
     };
 
     time_now() {
-        var d = new Date();
-        var now = Math.floor(d.getTime() / 1000);
+        const d = new Date();
+        const now = Math.floor(d.getTime() / 1000);
         return now;
     };
 
     time_ago(timestamp) {
-        var seconds = this.time_now() - timestamp;
+        const seconds = this.time_now() - timestamp;
         if (seconds > 2 * 86400) {
             return Math.floor(seconds / 86400) + ' days ago';
         }
@@ -298,8 +302,8 @@ class App {
     }
 
     update_time_ago() {
-        var times = document.getElementsByTagName('time');
-        for (var i = 0; i < times.length; i++) {
+        let times = document.getElementsByTagName('time');
+        for (let i = 0; i < times.length; i++) {
             times[i].innerText = this.time_ago(times[i].dataset.timestamp);
         }
     };
@@ -308,18 +312,18 @@ class App {
         let id = tx;
         const el = document.getElementById(id);
         if (!el) {
-            var article = document.getElementById('play');
-            var div = document.createElement('div');
+            const article = document.getElementById('play');
+            let div = document.createElement('div');
             div.id = id;
             div.className = 'line pending';
 
-            var time = document.createElement('time');
+            let time = document.createElement('time');
             time.dataset.timestamp = this.time_now();
-            var text = document.createTextNode('NOW');
+            let text = document.createTextNode('NOW');
             time.appendChild(text);
             div.appendChild(time);
 
-            var text = document.createTextNode('Tx pending, wating for sonerex');
+            text = document.createTextNode('Tx pending, wating for sonerex');
             div.appendChild(text);
             article.prepend(div);
         }
@@ -515,10 +519,10 @@ class App {
             return;
         }
         document.getElementById('play-error').innerText = '';
-        var guess_slider = document.getElementById('guess-slider').noUiSlider.get()
-        var start = ('0' + guess_slider[0].toString(16)).slice(-2);
-        var end = ('0' + guess_slider[1].toString(16)).slice(-2);
-        var fee = web3.toWei(document.getElementById('fee-slider').noUiSlider.get().replace(' ETH', ''), 'ether');
+        const guess_slider = document.getElementById('guess-slider').noUiSlider.get();
+        let start = ('0' + guess_slider[0].toString(16)).slice(-2);
+        let end = ('0' + guess_slider[1].toString(16)).slice(-2);
+        let fee = web3.toWei(document.getElementById('fee-slider').noUiSlider.get().replace(' ETH', ''), 'ether');
         if (start.length == 2 && start.match(/[0-9a-f]{2}/) &&
             end.length == 2 && end.match(/[0-9a-f]{2}/) &&
             fee.length > 0 && fee.match(/[0-9]+/)) {
