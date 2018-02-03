@@ -24,68 +24,151 @@
 <div class="container">
 
     <header>
-        <h1 class="logo">Lifeslot</h1>
-        <div>
-            <span id="account">0.00000 ETH</span>
+        <h1 class="logo">lifeslot</h1>
+        <div id="error"></div>
+        <div class="account-info">
+            <span class="balance">Balance</span>
+            <span id="account">0.00000</span>
         </div>
     </header>
 
+    <div class="play">
+
+        <div class="spinners spinning">
+            <section class="carousel-container">
+                <div class="carousel-item">
+                    <figure>-</figure>
+                    <figure>0</figure>
+                    <figure>1</figure>
+                    <figure>2</figure>
+                    <figure>3</figure>
+                    <figure>4</figure>
+                    <figure>5</figure>
+                    <figure>6</figure>
+                    <figure>7</figure>
+                    <figure>8</figure>
+                    <figure>9</figure>
+                </div>
+            </section>
+
+            <section class="carousel-container">
+                <div class="carousel-item">
+                    <figure>-</figure>
+                    <figure>0</figure>
+                    <figure>1</figure>
+                    <figure>2</figure>
+                    <figure>3</figure>
+                    <figure>4</figure>
+                    <figure>5</figure>
+                    <figure>6</figure>
+                    <figure>7</figure>
+                    <figure>8</figure>
+                    <figure>9</figure>
+                </div>
+            </section>
+
+            <section class="carousel-container">
+                <div class="carousel-item">
+                    <figure>-</figure>
+                    <figure>0</figure>
+                    <figure>1</figure>
+                    <figure>2</figure>
+                    <figure>3</figure>
+                    <figure>4</figure>
+                    <figure>5</figure>
+                    <figure>6</figure>
+                    <figure>7</figure>
+                    <figure>8</figure>
+                    <figure>9</figure>
+                </div>
+            </section>
+        </div>
+
+        <div class="play-selectors">
+            <h2>
+                Guess the <span>result</span> between <span>1</span> and <span>255</span>
+            </h2>
+            <div id="guess-slider"></div>
+            <div id="fee-slider"></div>
+            <div>
+                <button id="play-button">
+                    PLAY <i id="play-button-fee"></i> WIN <i id="play-button-win"></i>
+                </button>
+            </div>
+
+            <p class="house">
+                Zero is House
+            </p>
+        </div>
+    </div>
+
+    <div class="lottery-info">
+
+        <h2>
+            Contract
+            <span>
+                <a href="https://ropsten.etherscan.io/address/0x995f617066a6968749eb980c2613314f4d45d4ab">0x995f617066a6968749eb980c2613314f4d45d4ab</a>
+            </span>
+        </h2>
+        <h2>
+            Balance
+            <span id="balance">
+                23 ETH
+            </span>
+        </h2>
+        <h2>
+            Max Bet
+            <span id="max_fee">
+            </span>
+        </h2>
+        <h2>
+            Last result
+            <span id="last_result">
+            </span>
+        </h2>
+    </div>
+
+    <div class="play-history">
+
+        <h3>PLAY HISTORY</h3>
+
+        <ul class="headers">
+            <li>Timestamp</li>
+            <li>Numbers</li>
+            <li>Result</li>
+            <li>Lucky?</li>
+        </ul>
+
+        <div class="result-list">
+            <section id="section"></section>
+        </div>
+    </div>
+
+    <footer>
+        <div class="made-love">
+            <h3>
+                lifeslot
+            </h3>
+
+            <h3>
+                life lottery
+            </h3>
+            <p>
+                Lifeslot 2018 Made with ❤ in Amsterdam
+            </p>
+        </div>
+        <div class="logos">
+            <a href="https://www.stateofthedapps.com/">
+                <img src="img/state-of-dapps.png" alt="State of the dapps">
+            </a>
+            <a href="https://lifelottery.herokuapp.com/">
+                <img src="img/slack.png" alt="Join us on Slack">
+            </a>
+            <a href="https://metamask.io/">
+                <img src="img/metamask.png" alt="MetaMask">
+            </a>
+        </div>
+    </footer>
 </div>
-
-
-<div class="spinners spinning">
-    <section class="container">
-        <div class="carousel-item">
-            <figure>-</figure>
-            <figure>0</figure>
-            <figure>1</figure>
-            <figure>2</figure>
-            <figure>3</figure>
-            <figure>4</figure>
-            <figure>5</figure>
-            <figure>6</figure>
-            <figure>7</figure>
-            <figure>8</figure>
-            <figure>9</figure>
-        </div>
-    </section>
-
-    <section class="container">
-        <div class="carousel-item">
-            <figure>-</figure>
-            <figure>0</figure>
-            <figure>1</figure>
-            <figure>2</figure>
-            <figure>3</figure>
-            <figure>4</figure>
-            <figure>5</figure>
-            <figure>6</figure>
-            <figure>7</figure>
-            <figure>8</figure>
-            <figure>9</figure>
-        </div>
-    </section>
-
-    <section class="container">
-        <div class="carousel-item">
-            <figure>-</figure>
-            <figure>0</figure>
-            <figure>1</figure>
-            <figure>2</figure>
-            <figure>3</figure>
-            <figure>4</figure>
-            <figure>5</figure>
-            <figure>6</figure>
-            <figure>7</figure>
-            <figure>8</figure>
-            <figure>9</figure>
-        </div>
-    </section>
-</div>
-
-<div id="error"></div>
-<section id="section">
-</section>
 </body>
-
 </html>

@@ -4,8 +4,9 @@ const BigNumber = require('./bignumber.min');
 const abi = require('./conf.js');
 import Spinner from './spinner';
 import '../css/reset.scss';
-import '../css/style.scss';
 import '../css/nouislider.min.css';
+import '../css/style.scss';
+import '../fonts/fonts.css';
 
 class App {
 
@@ -18,7 +19,7 @@ class App {
             this.address = '0x995f617066a6968749eb980c2613314f4d45d4ab';
             this.contract = web3.eth.contract(abi);
             this.ETHBlockByte = this.contract.at(this.address);
-            this.step = 1000000000000000; // 0.001 ETH
+            this.step = 1000000000000000;
 
             this.getAccountInfo();
             this.init(this.address, this.ETHBlockByte);
@@ -141,24 +142,20 @@ class App {
     };
 
     initSpinner() {
-
         this.buildSpinners();
-
         setTimeout(() => {
             this.setStandByOn();
         }, 1600);
-
         setTimeout(() => {
             document.body.addClassName('ready');
         }, 0);
     };
 
     updateBalance() {
-        web3.eth.getBalance(web3.eth.accounts[0], function (e, r) {
+        web3.eth.getBalance(web3.eth.accounts[0], (e, r) => {
             document.getElementById('account').innerText = parseFloat(web3.fromWei(r, 'ether')).toFixed(5) + ' ETH';
         });
     };
-
 
     data(address, contract) {
         return {
@@ -175,6 +172,7 @@ class App {
     init(address, contract) {
         const proxy = new Proxy(this.data(address, contract), {
             set: function (obj, prop, value) {
+
                 obj[prop] = value;
                 switch (prop) {
                     case 'balance':
@@ -189,13 +187,6 @@ class App {
 
                     case 'address':
                     case 'owner':
-                        let a = document.createElement('a');
-                        a.setAttribute('href', 'https://ropsten.etherscan.io/address/' + value);
-                        a.setAttribute('target', '_blank');
-                        a.innerText = value;
-                        document.getElementById(prop).removeChild(document.getElementById(prop).firstChild);
-                        document.getElementById(prop).append(a);
-                        break;
                 }
                 return true;
             }
@@ -211,7 +202,6 @@ class App {
                     if (r.args._sender == web3.eth.accounts[0]) {
                         this.spinFromPlay(proxy.last_result);
                     }
-
                     break;
 
                 case 'Balance':
@@ -331,26 +321,41 @@ class App {
 
     render_play(play_event) {
         let id = play_event.transactionHash;
-        var el = document.getElementById(id);
+        const el = document.getElementById(id);
         if (el) {
             el.parentNode.removeChild(el);
         }
-        var article = document.getElementById('play');
-        var div = document.createElement('div');
+        const article = document.getElementById('play');
+        const div = document.createElement('a');
+        div.href = 'https://ropsten.etherscan.io/tx/' + id;
+        div.target = '_blank';
         div.id = id;
-        div.className = 'line';
 
-        var time = document.createElement('time');
+        let time = document.createElement('time');
         time.dataset.timestamp = play_event.args._time;
-        var text = document.createTextNode(this.time_ago(play_event.args._time));
+        let text = document.createTextNode(this.time_ago(play_event.args._time));
         time.appendChild(text);
         div.appendChild(time);
+        div.className = 'line';
 
         if (play_event.args._winner) {
             div.className = 'line winner';
         }
-        var text = document.createTextNode('start: ' + parseInt(play_event.args._start) + ' end: ' + parseInt(play_event.args._end) + ' result: ' + parseInt(play_event.args._result));
-        div.appendChild(text);
+
+        let numbers = document.createElement('span');
+        let numbersText = document.createTextNode(parseInt(play_event.args._start) + ' - ' + parseInt(play_event.args._end));
+        numbers.appendChild(numbersText);
+        div.appendChild(numbers);
+
+        let result = document.createElement('span');
+        let resultText = document.createTextNode(parseInt(play_event.args._result));
+        result.appendChild(resultText);
+        div.appendChild(result);
+
+        let lucky = document.createElement('span');
+        lucky.className = 'icon-line';
+        div.appendChild(lucky);
+
         article.prepend(div);
     };
 
@@ -359,75 +364,29 @@ class App {
         let section = document.getElementById('section');
         let article = document.createElement('article');
         article.id = data.address;
-        for (var key in data) {
-            if (['contract', 'create_block'].indexOf(key) != -1) {
-                continue;
-            }
-            var span = document.createElement('span');
-            span.id = key;
-            var text = document.createTextNode(data[key]);
-            span.appendChild(text);
-            var div = document.createElement('div');
-            div.className = 'line';
-            var text = document.createTextNode(key.replace('_', ' ') + ': ');
-            div.appendChild(text);
-            div.appendChild(span);
-            article.appendChild(div);
-        }
-        var div = document.createElement('div');
-        div.className = 'line';
+
+        //Error message
+        let div = document.createElement('div');
         div.id = 'play-error';
         div.style = 'color: #f00;';
-        var text = document.createTextNode('');
+        let text = document.createTextNode('');
         div.appendChild(text);
         article.appendChild(div);
 
-        var div = document.createElement('div');
-        div.className = 'line';
 
-        var h5 = document.createElement('h5');
-        var text = document.createTextNode('Risk range from START to END, guess the RESULT between 1 and 255');
-        h5.appendChild(text);
-        div.appendChild(h5);
-
-        var guess_slider = document.createElement('div');
-        guess_slider.id = 'guess-slider';
-        div.appendChild(guess_slider);
-
-        var h5 = document.createElement('h5');
-        var text = document.createTextNode('Participation fee to send in ETH (this controls the prize)');
-        h5.appendChild(text);
-        div.appendChild(h5);
-
-        var fee_slider = document.createElement('div');
-        fee_slider.id = 'fee-slider';
-        div.appendChild(fee_slider);
-
-        var input = document.createElement('input');
-        input.id = 'submit';
-        input.type = 'button';
-        input.value = 'PLAY'
-        input.addEventListener('click', () => {
+        const playButton = document.getElementById('play-button');
+        playButton.addEventListener('click', () => {
             this.play(data);
         });
-        div.appendChild(input);
 
-        article.appendChild(div);
-
-        var h3 = document.createElement('h3');
-        var text = document.createTextNode('Play history');
-        h3.appendChild(text);
-        article.appendChild(h3);
-
-        var div = document.createElement('div');
-        div.className = 'line';
+        div = document.createElement('div');
         div.id = 'play';
         article.appendChild(div);
         section.appendChild(article);
 
         setInterval(() => {
             this.update_time_ago();
-        }, 60000);
+        }, 10000);
     };
 
     create_sliders(max_fee) {
@@ -442,11 +401,6 @@ class App {
                 'min': 1,
                 'max': 255
             },
-            pips: {
-                mode: 'values',
-                values: [1, 255],
-                density: 1
-            },
             format: {
                 to: function (value) {
                     return parseInt(value);
@@ -458,9 +412,9 @@ class App {
         });
 
         let connect = guess_slider.querySelectorAll('.noUi-connect');
-        connect[0].classList.add('red');
-        connect[1].classList.add('blue');
-        connect[2].classList.add('red');
+        connect[0].classList.add('color-gray-2');
+        connect[1].classList.add('color-red');
+        connect[2].classList.add('color-gray-2');
         guess_slider.noUiSlider.on('set', () => {
             this.calculate_prize();
         });
@@ -487,7 +441,7 @@ class App {
         });
 
         connect = fee_slider.querySelectorAll('.noUi-connect');
-        connect[0].classList.add('green');
+        connect[0].classList.add('color-red');
         fee_slider.noUiSlider.on('set', () => {
             this.calculate_prize();
         });
@@ -510,12 +464,15 @@ class App {
         fee = parseFloat(web3.fromWei(fee, 'ether')).toFixed(3) + ' ETH';
         credit = parseFloat(web3.fromWei(credit, 'ether')).toFixed(3) + ' ETH';
 
-        document.getElementById('submit').value = 'PLAY ' + fee + ' and WIN ' + credit;
+        let buttonFee = document.getElementById('play-button-fee');
+        let buttonWin = document.getElementById('play-button-win');
+        buttonFee.innerText = fee;
+        buttonWin.innerText = credit;
     };
 
     play(data) {
         if (!web3.eth.accounts[0]) {
-            document.getElementById('play-error').innerText = 'Unlock metamask account';
+            document.getElementById('play-error').innerText = 'Please unlock MetaMask';
             return;
         }
         document.getElementById('play-error').innerText = '';
