@@ -8,6 +8,14 @@ body {
         color: $color-gray-5;
     }
     overflow-x: hidden;
+
+    &.open {
+        overflow: hidden;
+
+        .play-history {
+            z-index: -1;
+        }
+    }
 }
 
 .container {
@@ -46,8 +54,9 @@ header {
     }
 
     .logo {
-        flex: 11 0 0;
+        flex: 9 0 0;
         height: 50px;
+        color: $color-black;
         font-size: 42px;
         padding-left: 50px;
         background: url("../img/logo-pic.svg") no-repeat;
@@ -115,7 +124,7 @@ header {
             cursor: pointer;
             position: absolute;
             margin-left: -160px;
-            padding: 20px 30px;
+            padding: 20px 30px 20px 20px;
             height: 20px;
             font-size: 20px;
             line-height: 0;
@@ -124,6 +133,10 @@ header {
             background-image: linear-gradient(-180deg, #E5463E 0%, #B41B13 100%);
             box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.40);
 
+            span {
+                color: $color-white;
+                margin-left: 16px;
+            }
             i {
                 color: #fff;
                 margin: 0 10px;
@@ -251,7 +264,7 @@ header {
             margin: 8px 0;
             padding: 6px 10px;
             font-size: 12px;
-            background: #FFFFFF;
+            background: $color-white;
             box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.05);
             display: flex;
             justify-content: space-between;
@@ -266,6 +279,10 @@ header {
             .icon-line {
                 @extend .icon-emo-unhappy;
                 color: $color-red;
+            }
+
+            &.user-play {
+                background: red;
             }
         }
 
@@ -284,12 +301,19 @@ footer {
     margin-bottom: 100px;
 
     .made-love {
-        h3 {
+        a {
             display: inline-block;
             background: url("../img/logo-pic.svg") no-repeat;
             background-size: 20px;
             padding: 2px 0 2px 24px;
-            margin: 0 5px 15px 0;
+            margin: 0 15px 15px 0;
+            text-decoration: none;
+            &:hover {
+                opacity: 0.6;
+            }
+        }
+        p {
+            font-size: 14px;
         }
     }
     .logos {
@@ -301,7 +325,7 @@ footer {
             }
         }
         a:nth-child(1) img {
-            max-width: 130px;
+            max-width: 126px;
         }
         a:nth-child(2) img {
             max-width: 100px;
@@ -331,9 +355,141 @@ footer {
 }
 
 .pending {
-    color: #fff !important;
+
+    color: $color-white !important;
+    time {
+        color: $color-white !important;
+    }
     background-color: red;
     animation-name: pending;
     animation-duration: 4s;
     animation-iteration-count: infinite;
+}
+
+.btn {
+    cursor: pointer;
+    padding: 10px 16px;
+    height: 16px;
+    font-size: 16px;
+    color: $color-white;
+    background-image: linear-gradient(-180deg, #E5463E 0%, #B41B13 100%);
+    box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.40);
+}
+
+body.no-metamask {
+
+    #no-metamask {
+        display: block;
+        padding: 20px;
+
+        .header {
+            padding: 20px;
+            background: $color-white;
+        }
+        h1 {
+            font-size: 30px;
+        }
+        h2 {
+            margin: 20px;
+        }
+        p {
+            margin: 40px;
+        }
+
+        a {
+            img {
+                display: block;
+                margin: auto;
+            }
+        }
+
+        iframe {
+            display: block;
+            margin: 20px auto;
+        }
+
+        .wrap {
+            position: absolute;
+            z-index: 10;
+            text-align: center;
+            width: 100%;
+        }
+    }
+}
+
+#no-metamask {
+    display: none;
+    position: relative;
+
+    &:before {
+        content: '';
+        position: fixed;
+        background: $color-white-80;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        z-index: 1;
+    }
+}
+
+#how-to-play {
+    display: none;
+    position: relative;
+
+    .btn {
+        max-width: 220px;
+        padding: 14px;
+        margin: auto;
+    }
+
+    &:before {
+        content: '';
+        position: fixed;
+        background: $color-white-80;
+        left: 0;
+        right: 0;
+        top: 100px;
+        bottom: 0;
+        z-index: 0;
+    }
+
+    .wrap {
+        position: relative;
+        z-index: 10;
+        width: 1000px;
+        margin: auto;
+        text-align: center;
+
+        img {
+            position: absolute;
+        }
+        img:nth-child(1) {
+            top: 240px;
+            left: -200px;
+        }
+        img:nth-child(2) {
+            top: 50px;
+            right: -180px;
+        }
+        img:nth-child(3) {
+            top: 340px;
+            right: -180px;
+        }
+        img:nth-child(4) {
+            top: 500px;
+            margin-left: -160px;
+        }
+
+        .btn {
+            width: 120px;
+            position: absolute;
+            right: 260px;
+            top: 28px;
+        }
+    }
+
+    &.open {
+        display: block;
+    }
 }

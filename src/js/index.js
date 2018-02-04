@@ -3,6 +3,7 @@ const noUiSlider = require('./nouislider.min');
 const BigNumber = require('./bignumber.min');
 const abi = require('./conf.js');
 import Spinner from './spinner';
+import Analytics from './analytics';
 import '../css/reset.scss';
 import '../css/nouislider.min.css';
 import '../css/style.scss';
@@ -12,23 +13,43 @@ class App {
 
     constructor() {
 
+        this.analytics = new Analytics();
+
         if (typeof web3 !== 'undefined') {
             web3 = new Web3(web3.currentProvider);
-
             this.spinnerList = undefined;
             this.address = '0x995f617066a6968749eb980c2613314f4d45d4ab';
             this.contract = web3.eth.contract(abi);
             this.ETHBlockByte = this.contract.at(this.address);
             this.step = 1000000000000000;
-
+            this.userAccount = web3.eth.accounts[0];
             this.getAccountInfo();
             this.init(this.address, this.ETHBlockByte);
 
         } else {
-            alert('you need metamask');
+            document.body.addClassName('no-metamask');
+            this.analytics.noMetamask();
         }
 
-        this.initSpinner();
+        setTimeout(() => {
+            this.initSpinner();
+        }, 50);
+
+    }
+
+    toggleHowToPlay() {
+        const howTo = document.getElementById('how-to-play');
+        let hasClassOpen = howTo.className.indexOf('open');
+        if (hasClassOpen > 0) {
+            howTo.removeClassName('open');
+            document.body.removeClassName('open');
+            this.analytics.openHowTo();
+
+        } else {
+            howTo.addClassName('open');
+            document.body.addClassName('open');
+            this.analytics.closeHowTo();
+        }
     }
 
     getAccountInfo() {
@@ -303,8 +324,10 @@ class App {
         const el = document.getElementById(id);
         if (!el) {
             const article = document.getElementById('play');
-            let div = document.createElement('div');
+            let div = document.createElement('a');
             div.id = id;
+            div.href = 'https://ropsten.etherscan.io/tx/' + id;
+            div.target = '_blank';
             div.className = 'line pending';
 
             let time = document.createElement('time');
@@ -313,7 +336,7 @@ class App {
             time.appendChild(text);
             div.appendChild(time);
 
-            text = document.createTextNode('Tx pending, wating for sonerex');
+            text = document.createTextNode('Tx pending, waiting confirmation');
             div.appendChild(text);
             article.prepend(div);
         }
@@ -337,10 +360,14 @@ class App {
         time.appendChild(text);
         div.appendChild(time);
         div.className = 'line';
+        // let isSenderUser = play_event.args._sender == this.userAccount;
 
         if (play_event.args._winner) {
             div.className = 'line winner';
         }
+        // if (isSenderUser) {
+        //     div.addClassName('user-play');
+        // }
 
         let numbers = document.createElement('span');
         let numbersText = document.createTextNode(parseInt(play_event.args._start) + ' - ' + parseInt(play_event.args._end));
@@ -381,6 +408,7 @@ class App {
         const playButton = document.getElementById('play-button');
         playButton.addEventListener('click', () => {
             this.play(data);
+            this.analytics.openMetamask();
         });
 
         div = document.createElement('div');
@@ -477,6 +505,7 @@ class App {
     play(data) {
         if (!web3.eth.accounts[0]) {
             document.getElementById('play-error').innerText = 'Please unlock MetaMask';
+            this.analytics.noMetamaskAccount();
             return;
         }
         document.getElementById('play-error').innerText = '';
@@ -494,12 +523,13 @@ class App {
                 if (e) {
                     document.getElementById('play-error').innerText = 'Transaction was NOT completed, try again.';
                     console.log(e.message);
+                    this.analytics.errorMetamask();
                 }
                 if (r) {
                     this.wait_play(r);
                     console.log('play tx ' + r);
                     this.setStandByPlayOn();
-
+                    this.analytics.playSuccess();
                 }
             });
         }
@@ -511,5 +541,5 @@ class App {
 
 
 window.addEventListener('DOMContentLoaded', function () {
-    const app = new App();
+    window.app = new App();
 }, false);

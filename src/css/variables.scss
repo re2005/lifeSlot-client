@@ -1,3 +1,6 @@
+$color-white: #FFFFFF;
+$color-white-80: rgba(255, 255, 255, .8);
+$color-black: #000000;
 $color-green: #7FAE3B;
 $color-gray: #E1E1E1;
 $color-gray-1: #F5F5F5;
@@ -11,6 +14,7 @@ $color-green-1: #1FCE6D;
 .color-red {
     background: $color-red;
 }
+
 .color-gray-2 {
     background: $color-gray-2;
 }
