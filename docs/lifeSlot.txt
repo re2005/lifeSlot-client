@@ -1,0 +1,16 @@
+
+
+
+Description
+LifeSlot - It's a fair game based on Ethereum Blockchain
+
+Keywords:
+Lottery, slot, lucky, blockchain, ethereum
+
+Url:
+https://lifeslot.github.io/
+
+
+Contract Address:
+
+

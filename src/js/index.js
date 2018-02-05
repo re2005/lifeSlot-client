@@ -18,13 +18,16 @@ class App {
         if (typeof web3 !== 'undefined') {
             web3 = new Web3(web3.currentProvider);
             this.spinnerList = undefined;
-            this.address = '0x995f617066a6968749eb980c2613314f4d45d4ab';
+            this.address = '0x8fd2EAA9ec4BEb9bdaeD12fB2DB3906439DcAF0f';
             this.contract = web3.eth.contract(abi);
             this.ETHBlockByte = this.contract.at(this.address);
             this.step = 1000000000000000;
             this.userAccount = web3.eth.accounts[0];
             this.getAccountInfo();
             this.init(this.address, this.ETHBlockByte);
+
+            this.fee_slider = undefined;
+            this.guess_slider = undefined;
 
         } else {
             document.body.addClassName('no-metamask');
@@ -37,6 +40,16 @@ class App {
 
     }
 
+
+    animateSliders() {
+
+        setInterval(() => {
+            this.fee_slider.noUiSlider.set([0.18]);
+            this.guess_slider.noUiSlider.set([27, 167]);
+        }, 300);
+    }
+
+
     toggleHowToPlay() {
         const howTo = document.getElementById('how-to-play');
         let hasClassOpen = howTo.className.indexOf('open');
@@ -44,11 +57,11 @@ class App {
             howTo.removeClassName('open');
             document.body.removeClassName('open');
             this.analytics.openHowTo();
-
         } else {
             howTo.addClassName('open');
             document.body.addClassName('open');
             this.analytics.closeHowTo();
+            this.animateSliders();
         }
     }
 
@@ -360,11 +373,12 @@ class App {
         time.appendChild(text);
         div.appendChild(time);
         div.className = 'line';
-        // let isSenderUser = play_event.args._sender == this.userAccount;
 
         if (play_event.args._winner) {
             div.className = 'line winner';
         }
+
+        // let isSenderUser = play_event.args._sender == this.userAccount;
         // if (isSenderUser) {
         //     div.addClassName('user-play');
         // }
@@ -422,9 +436,9 @@ class App {
     };
 
     create_sliders(max_fee) {
-        let guess_slider = document.getElementById('guess-slider');
-        noUiSlider.create(guess_slider, {
-            start: [30, 225],
+        this.guess_slider = document.getElementById('guess-slider');
+        noUiSlider.create(this.guess_slider, {
+            start: [40, 210],
             step: 1,
             behaviour: 'drag',
             connect: [true, true, true],
@@ -443,17 +457,17 @@ class App {
             }
         });
 
-        let connect = guess_slider.querySelectorAll('.noUi-connect');
+        let connect = this.guess_slider.querySelectorAll('.noUi-connect');
         connect[0].classList.add('color-gray-2');
         connect[1].classList.add('color-red');
         connect[2].classList.add('color-gray-2');
-        guess_slider.noUiSlider.on('set', () => {
+        this.guess_slider.noUiSlider.on('set', () => {
             this.calculate_prize();
         });
 
         max_fee = parseInt(parseInt(max_fee / this.step) * this.step);
-        let fee_slider = document.getElementById('fee-slider');
-        noUiSlider.create(fee_slider, {
+        this.fee_slider = document.getElementById('fee-slider');
+        noUiSlider.create(this.fee_slider, {
             start: 0.1,
             step: this.step,
             connect: [true, false],
@@ -472,9 +486,9 @@ class App {
             }
         });
 
-        connect = fee_slider.querySelectorAll('.noUi-connect');
+        connect = this.fee_slider.querySelectorAll('.noUi-connect');
         connect[0].classList.add('color-red');
-        fee_slider.noUiSlider.on('set', () => {
+        this.fee_slider.noUiSlider.on('set', () => {
             this.calculate_prize();
         });
         this.calculate_prize();
@@ -490,7 +504,10 @@ class App {
 
         let range = end - start + 1;
         let percentage = 100 - parseInt(range * 100 / 255);
-        let prize = fee.times(percentage).div(100);
+        let prize = 0;
+        if (percentage > 10) {
+            prize = fee.times(percentage - 10).div(100);
+        }
         let credit = fee.plus(prize);
 
         fee = parseFloat(web3.fromWei(fee, 'ether')).toFixed(3) + ' ETH';
