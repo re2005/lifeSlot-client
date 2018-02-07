@@ -2,10 +2,10 @@
 
 
 Description
-LifeSlot - It's a fair game based on Ethereum Blockchain
+LifeSlot - Mathematically fair slot game based on Ethereum blockchain technology, can you guess the number between 1 and 255?
 
 Keywords:
-Lottery, slot, lucky, blockchain, ethereum
+slot, fair, luck, game, lottery, life
 
 Url:
 https://lifeslot.github.io/
