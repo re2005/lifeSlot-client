@@ -12,5 +12,5 @@ https://lifeslot.github.io/
 
 
 Contract Address:
-
+0x66Bb787D5AE1e6D9bcFcfFdceEc9bEcc24D19c1e
 
