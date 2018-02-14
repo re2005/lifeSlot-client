@@ -14,20 +14,36 @@ class App {
     constructor() {
 
         this.analytics = new Analytics();
+        this.address = '0x66Bb787D5AE1e6D9bcFcfFdceEc9bEcc24D19c1e';
+        this.addressTestnet = '0xF16955DC0d318c33Fe7E140f1242fD4F1c0E8f5e';
+        this.minimumRisk = 40;
+        let _address = undefined;
 
         if (typeof web3 !== 'undefined') {
-            web3 = new Web3(web3.currentProvider);
-            this.spinnerList = undefined;
-            this.address = '0x8fd2EAA9ec4BEb9bdaeD12fB2DB3906439DcAF0f';
-            this.contract = web3.eth.contract(abi);
-            this.ETHBlockByte = this.contract.at(this.address);
-            this.step = 1000000000000000;
-            this.userAccount = web3.eth.accounts[0];
-            this.getAccountInfo();
-            this.init(this.address, this.ETHBlockByte);
+            web3.version.getNetwork((err, netId) => {
+                if (!err) {
+                    this.network = netId;
+                    this.makeContractlink();
 
-            this.fee_slider = undefined;
-            this.guess_slider = undefined;
+                    web3 = new Web3(web3.currentProvider);
+                    this.spinnerList = undefined;
+                    if (netId == 1) {
+                        _address = this.address;
+                    } else {
+                        _address = this.addressTestnet;
+                    }
+
+                    this.contract = web3.eth.contract(abi);
+                    this.ETHBlockByte = this.contract.at(_address);
+                    this.step = 1000000000000000;
+                    this.userAccount = web3.eth.accounts[0];
+                    this.getAccountInfo();
+                    this.init(_address, this.ETHBlockByte);
+
+                    this.fee_slider = undefined;
+                    this.guess_slider = undefined;
+                }
+            });
 
         } else {
             document.body.addClassName('no-metamask');
@@ -40,12 +56,32 @@ class App {
 
     }
 
+    makeContractlink() {
+        let link = document.getElementById('contract-link');
+        if (this.network == 1) {
+            link.href = this.makeEtherScanUrl() + 'address/' + this.address;
+            link.innerText = this.address;
+        } else {
+            link.href = this.makeEtherScanUrl() + 'address/' + this.addressTestnet;
+            link.innerText = this.addressTestnet;
+        }
+    }
+
+    makeEtherScanUrl() {
+        if (this.network == 1) {
+            return 'https://etherscan.io/';
+        } else {
+            return 'https://ropsten.etherscan.io/';
+        }
+    };
 
     animateSliders() {
-
         setInterval(() => {
-            this.fee_slider.noUiSlider.set([0.18]);
+            this.fee_slider.noUiSlider.set([0.04]);
             this.guess_slider.noUiSlider.set([27, 167]);
+
+            this.fee_slider.noUiSlider.off('change');
+            this.guess_slider.noUiSlider.off('change');
         }, 300);
     }
 
@@ -61,7 +97,7 @@ class App {
             howTo.addClassName('open');
             document.body.addClassName('open');
             this.analytics.closeHowTo();
-            this.animateSliders();
+            // this.animateSliders();
         }
     }
 
@@ -227,7 +263,6 @@ class App {
         });
 
         let all_events = proxy.contract.allEvents({fromBlock: 'latest'}, (e, r) => {
-
             switch (r.event) {
                 case 'Play':
                     this.render_play(r);
@@ -237,7 +272,6 @@ class App {
                         this.spinFromPlay(proxy.last_result);
                     }
                     break;
-
                 case 'Balance':
                     proxy.balance = r.args._balance;
                     proxy.contract.max_fee((e, r) => {
@@ -252,7 +286,6 @@ class App {
                         });
                     });
                     break;
-
                 case 'Destroy':
                     all_events.stopWatching();
                     break;
@@ -339,7 +372,7 @@ class App {
             const article = document.getElementById('play');
             let div = document.createElement('a');
             div.id = id;
-            div.href = 'https://ropsten.etherscan.io/tx/' + id;
+            div.href = this.makeEtherScanUrl() + 'tx/' + id;
             div.target = '_blank';
             div.className = 'line pending';
 
@@ -363,7 +396,7 @@ class App {
         }
         const article = document.getElementById('play');
         const div = document.createElement('a');
-        div.href = 'https://ropsten.etherscan.io/tx/' + id;
+        div.href = this.makeEtherScanUrl() + 'tx/' + id;
         div.target = '_blank';
         div.id = id;
 
@@ -502,11 +535,12 @@ class App {
         let fee = web3.toWei(document.getElementById('fee-slider').noUiSlider.get().replace(' ETH', ''), 'ether');
         fee = new BigNumber(fee);
 
+
         let range = end - start + 1;
-        let percentage = 100 - parseInt(range * 100 / 255);
+        let percentageRisk = 100 - parseInt(range * 100 / 255);
         let prize = 0;
-        if (percentage > 10) {
-            prize = fee.times(percentage - 10).div(100);
+        if (percentageRisk > this.minimumRisk) {
+            prize = fee.times(percentageRisk - 10).div(100);
         }
         let credit = fee.plus(prize);
 
