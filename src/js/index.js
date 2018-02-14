@@ -14,7 +14,7 @@ class App {
     constructor() {
 
         this.analytics = new Analytics();
-        this.address = '0x66Bb787D5AE1e6D9bcFcfFdceEc9bEcc24D19c1e';
+        this.address = '0x8e68f349B29f2e664C1FeA4eE77c19d4F498042A';
         this.addressTestnet = '0xF16955DC0d318c33Fe7E140f1242fD4F1c0E8f5e';
         this.minimumRisk = 40;
         let _address = undefined;
@@ -471,7 +471,7 @@ class App {
     create_sliders(max_fee) {
         this.guess_slider = document.getElementById('guess-slider');
         noUiSlider.create(this.guess_slider, {
-            start: [40, 210],
+            start: [60, 160],
             step: 1,
             behaviour: 'drag',
             connect: [true, true, true],
@@ -540,7 +540,8 @@ class App {
         let percentageRisk = 100 - parseInt(range * 100 / 255);
         let prize = 0;
         if (percentageRisk > this.minimumRisk) {
-            prize = fee.times(percentageRisk - 10).div(100);
+            let percentage = ((percentageRisk - this.minimumRisk) * 100) / (100 - this.minimumRisk);
+            prize = fee.times(parseInt(percentage)).div(100);
         }
         let credit = fee.plus(prize);
 
