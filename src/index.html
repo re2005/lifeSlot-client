@@ -55,7 +55,7 @@
         <img src="img/how-to-02.png" alt="How to Play?">
         <img src="img/how-to-03.png" alt="How to Play?">
         <img src="img/how-to-04.png" alt="How to Play?">
-        <div class="btn how-to-play"
+        <div class="btn how-to-play primary"
              onclick="app.toggleHowToPlay()">Close
         </div>
     </div>
@@ -64,7 +64,11 @@
 
     <header>
         <h1 class="logo">lifeslot</h1>
-        <div class="how-to-play btn" onclick="app.toggleHowToPlay()">How to play?</div>
+        <a href="https://lifeslot.github.io/faq.html"
+           class="btn secondary">FAQ</a>
+        <div class="how-to-play btn primary"
+             onclick="app.toggleHowToPlay()">How to play?
+        </div>
         <div id="error"></div>
         <div class="account-info">
             <span class="balance">Balance</span>
@@ -142,7 +146,7 @@
         </div>
     </div>
 
-    <div class="lottery-info">
+    <div class="lottery-info lottery-info__flex">
 
         <h2>
             Contract
