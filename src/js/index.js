@@ -14,7 +14,7 @@ class App {
     constructor() {
 
         this.analytics = new Analytics();
-        this.address = '0x74bfae119ffe09732b19a8b0a153f3ec742905b3';
+        this.address = '0x9b812d7c25369531167aff8eded423ef173441be';
         this.addressTestnet = '0xF16955DC0d318c33Fe7E140f1242fD4F1c0E8f5e';
         this.minimumRisk = 40;
         let _address = undefined;
